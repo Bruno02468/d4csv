@@ -2,6 +2,7 @@
 //! prices and sale values.
 
 use std::collections::{HashSet, HashMap};
+use std::fmt::Display;
 use std::ops::Range;
 use itertools::Itertools;
 use crate::context::SalesContext;
@@ -14,6 +15,12 @@ pub(crate) struct BatchAmount(Batch, usize);
 impl From<(Batch, usize)> for BatchAmount {
   fn from((b, a): (Batch, usize)) -> Self {
     return Self(b, a);
+  }
+}
+
+impl Display for BatchAmount {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    return write!(f, "{}x {}", self.1, self.0.num);
   }
 }
 
@@ -39,6 +46,20 @@ pub(crate) enum PricingMatch {
   PromoCombo(BatchAmount, BatchAmount),
   /// Turn-of-batch purchase. Those are hairy.
   TurnOfBatch(BatchAmount, BatchAmount)
+}
+
+impl Display for PricingMatch {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    return match self {
+      PricingMatch::Multiple(ba) => ba.fmt(f),
+      PricingMatch::PromoCombo(pba, ba) => {
+        write!(f, "{} + {}", pba, ba)
+      },
+      PricingMatch::TurnOfBatch(ba1, ba2) => {
+        write!(f, "{} + {}", ba1, ba2)
+      }
+    };
+  }
 }
 
 impl PricingMatch {

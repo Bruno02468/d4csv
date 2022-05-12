@@ -31,9 +31,9 @@ pub(crate) struct Sale {
   /// Sale date and time.
   pub(crate) when: DateTime<Utc>,
   /// Buyer e-mail address.
-  buyer_email: Option<String>,
+  pub(crate) buyer_email: Option<String>,
   /// Buyer username.
-  buyer_username: Option<String>,
+  pub(crate) buyer_username: Option<String>,
   /// Sale value in cents.
   pub(crate) value: usize,
   /// Seller data (online or offline).
@@ -41,19 +41,19 @@ pub(crate) struct Sale {
   /// Seller name (absent when online)
   pub(crate) seller_name: Option<String>,
   /// Seller ID string (no idea where it comes from).
-  seller_id: Option<String>,
+  pub(crate) seller_id: Option<String>,
   /// Seller email (absent when online).
-  seller_email: Option<String>,
+  pub(crate) seller_email: Option<String>,
   /// Token (also no idea).
-  token: String,
+  pub(crate) token: String,
   /// Sale ID (what?).
-  sale_id: String,
+  pub(crate) sale_id: String,
   /// Card name (it's all blank?).
-  card_name: Option<String>,
+  pub(crate) card_name: Option<String>,
   /// Card prefix.
-  card_pfx: Option<String>,
+  pub(crate) card_pfx: Option<String>,
   /// Card suffix.
-  card_sfx: Option<String>
+  pub(crate) card_sfx: Option<String>
 }
 
 impl Sale {

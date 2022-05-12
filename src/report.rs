@@ -1,10 +1,12 @@
 //! Useful information to report after looking at the sales list.
 
 pub(crate) mod sfields;
+pub(crate) mod tfields;
 
 use std::collections::HashMap;
 use yew::{Component, Properties, html, html_nested};
 use crate::report::sfields::SFIELDS;
+use crate::report::tfields::TFIELDS;
 use crate::sale::plus::SalesPlus;
 
 /// A report field made out to be a single string.
@@ -33,16 +35,23 @@ impl Default for ReportTemplate {
   fn default() -> Self {
     return Self {
       sfields: SFIELDS.to_vec(),
-      tfields: Vec::new()
+      tfields: TFIELDS.to_vec()
     };
   }
 }
 
 impl ReportTemplate {
+  /// Generates the "better" CSV dude.
+  fn gen_csv(&self, data: &SalesPlus) -> Vec<Vec<String>> {
+    let v: Vec<Vec<String>> = Vec::new();
+    return v;
+  }
+
   pub(crate) fn compute(&self, data: &SalesPlus) -> Report {
     return Report {
       sfields: self.sfields.iter().map(|f| f(data)).collect(),
       tfields: self.tfields.iter().map(|f| f(data)).collect(),
+      better_csv: self.gen_csv(data)
     }
   }
 }
@@ -53,7 +62,9 @@ pub(crate) struct Report {
   /// All string fields.
   sfields: Vec<StringField>,
   /// All table fields.
-  tfields: Vec<TableField>
+  tfields: Vec<TableField>,
+  /// The "better" CSV.
+  better_csv: Vec<Vec<String>>
 }
 
 /// A component that displays a report.

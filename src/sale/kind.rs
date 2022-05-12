@@ -1,5 +1,7 @@
 //! Seller abstractions: online or... somewhere.
 
+use std::fmt::Display;
+
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub(crate) enum SaleKind {
   /// Online sale, with some integer fraction as the fee.
@@ -25,5 +27,14 @@ impl SaleKind {
     } else {
       return price;
     }
+  }
+}
+
+impl Display for SaleKind {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    return write!(f, "Paga {}", match self {
+      SaleKind::Online(_) => "Online",
+      SaleKind::Offline => "Físico",
+    });
   }
 }

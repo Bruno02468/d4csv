@@ -1,6 +1,10 @@
 //! Structs for storing sale data and extra context and derived info.
 
+use std::cell::Cell;
 use std::collections::HashSet;
+use std::fmt::Display;
+
+use itertools::Itertools;
 
 use crate::context::SalesContext;
 use crate::sale::Sale;
@@ -23,6 +27,78 @@ impl SalePlus {
   /// Resolve this sale's pricing inference.
   pub(crate) fn resolve(&mut self, pm: PricingMatch) {
     self.pricematch = Some(pm);
+  }
+
+  /// Generate a line for the "better CSV".
+  pub(crate) fn gen_better_csv_line(&self) -> Vec<String> {
+    let mut v: Vec<String> = Vec::new();
+    let mut p = |vr: &mut Vec<String>, s: &dyn Display| {
+      vr.push(s.to_string());
+    };
+    let mut ps = |vr: &mut Vec<String>, s: Option<&String>| {
+      vr.push(s.unwrap_or(&"".into()).to_owned());
+    };
+    // add fields one by one
+    p(&mut v, &self.sale.when);
+    ps(&mut v, self.sale.buyer_email.as_ref());
+    ps(&mut v, self.sale.buyer_username.as_ref());
+    p(&mut v, &self.sale.value);
+    p(&mut v, &self.sale.sale_kind);
+    ps(&mut v, self.sale.seller_name.as_ref());
+    ps(&mut v, self.sale.seller_id.as_ref());
+    ps(&mut v, self.sale.seller_email.as_ref());
+    p(&mut v, &self.sale.token);
+    p(&mut v, &self.sale.sale_id);
+    ps(&mut v, self.sale.card_name.as_ref());
+    ps(&mut v, self.sale.card_pfx.as_ref());
+    ps(&mut v, self.sale.card_sfx.as_ref());
+    // now the extra fields!
+    // is this resolved?
+    p(&mut v, &{
+      if self.pricematch.is_some() {
+        "sim"
+      } else {
+        "não"
+      }
+    });
+    // if resolved, tell ya the batches
+    p(&mut v, &{
+      if let Some(pm) = self.pricematch {
+        pm.to_string()
+      } else {
+        match &self.pricecand {
+          PricingCandidate::Precise(pm) => pm.to_string(),
+          PricingCandidate::Ambiguous(hs) => {
+            hs.iter()
+              .map(|g| g.to_string())
+              .join("  ou  ")
+          },
+          PricingCandidate::NoMatch => "TRAGÉDIA".to_owned(),
+        }
+      }
+    });
+    return v;
+  }
+
+  /// Returns the header for the better CSV.
+  pub(crate) fn better_csv_header() -> Vec<String> {
+    return [
+      "DataCompra",
+      "EmailUsuarioAssociado",
+      "NomeUsuarioAssociado",
+      "ValorDaCompra",
+      "Status",
+      "NomeVendedor",
+      "IDVendedor",
+      "EmailVendedor",
+      "Token",
+      "ID",
+      "NomeCartao",
+      "PrimDigitosCartao",
+      "UltDigitosCartao",
+      "Resolvido?",
+      "Decodificação de preço"
+    ].iter().map(|s| s.to_string()).collect();
   }
 }
 
