@@ -18,7 +18,13 @@ impl Component for Wrapper {
         <div class="wrapper">
           <center>
             <h1>{ "parser do csv da D4" }</h1>
-            { "eu preciso dormir, cara." }
+            { "eu preciso dormir, cara. " }
+            <br />
+            <b>
+              <a href="https://github.com/Bruno02468/d4csv" target="_blank">
+                { "ah, e o código é aberto." }
+              </a>
+            </b>
           </center>
           <br />
           <br />
