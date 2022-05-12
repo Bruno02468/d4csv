@@ -1,0 +1,23 @@
+[package]
+name = "d4csv"
+authors = ["Bruno Borges Paschoalinoto"]
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+yew = "0.19"
+csv = "1.1"
+
+[dependencies.getrandom]
+version = "0.2"
+features = ["js"]
+
+[dependencies.web-sys]
+version = "0.3"
+features = [
+  "Event",
+  "InputEvent",
+  "MouseEvent",
+  "HtmlTextAreaElement",
+  "HtmlInputElement"
+]
