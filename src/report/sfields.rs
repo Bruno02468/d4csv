@@ -39,7 +39,7 @@ fn total_ok(sp: &SalesPlus) -> StringField {
 /// Total tickets sold.
 fn total_tickets(sp: &SalesPlus) -> StringField {
   return sf(
-    "Total de ingressos: ",
+    "Total de ingressos",
     sp.oks()
       .map(|s| s.pricematch.unwrap().tickets())
       .sum::<usize>()
@@ -49,7 +49,7 @@ fn total_tickets(sp: &SalesPlus) -> StringField {
 /// Total tickets sold online.
 fn online_tickets(sp: &SalesPlus) -> StringField {
   return sf(
-    "Ingressos online: ",
+    "Ingressos online",
     sp.oks()
       .filter_map(|s| {
         if let SaleKind::Online((_, _)) = &s.sale.sale_kind {

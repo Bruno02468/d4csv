@@ -179,6 +179,13 @@ impl SalesPlus {
       .filter(|s| s.pricematch.is_some());
   }
 
+  /// Generates the "better" CSV dude.
+  pub(crate) fn gen_csv(&self) -> Vec<Vec<String>> {
+    return self.sales.iter()
+      .map(|s| s.gen_better_csv_line())
+      .collect();
+  }
+
   /// Basic comb: look at adjacencies downwards. Returns the number of
   /// resolutions (i.e. effective changes).
   pub(crate) fn comb_simple(&mut self) -> usize {
