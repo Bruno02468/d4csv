@@ -24,4 +24,7 @@ pub(crate) fn iter2bp<T: IntoIterator<Item = usize>>(iter: T) -> BatchPrices {
   return bp;
 }
 
-
+/// Generates an iterator of Batch from a BatchPrices
+pub(crate) fn bp2iter(bp: &BatchPrices) -> impl Iterator<Item = Batch> + '_ {
+  return bp.iter().map(|(num, price)| Batch { num, price }); 
+}
