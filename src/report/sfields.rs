@@ -13,6 +13,7 @@ fn sf<T>(name: &str, value: T) -> StringField where T: Display {
 /// All the functions below.
 pub(crate) static SFIELDS: &[FieldFn] = &[
   total_sales,
+  total_ok,
   ambiguous_sales,
   evil_sales
 ];
@@ -22,12 +23,22 @@ fn total_sales(sp: &SalesPlus) -> StringField {
   return sf("Total de vendas", sp.sales.len());
 }
 
+/// Total sales for which we found a pricing match.
+fn total_ok(sp: &SalesPlus) -> StringField {
+  let nok = sp.oks().count();
+  let perc = ((nok as f64) / (sp.sales.len() as f64) * 100.0).round() as usize;
+  return sf(
+    "Vendas ok",
+    format!("{} ({}%)", nok, perc)
+  );
+}
+
 /// Number of ambiguous sales.
 fn ambiguous_sales(sp: &SalesPlus) -> StringField {
-  return sf("Vendas ambíguas", sp.ambiguous().count());
+  return sf("Vendas (inicialmente) ambíguas", sp.ambiguous().count());
 }
 
 /// Number of unsolvable sales.
 fn evil_sales(sp: &SalesPlus) -> StringField {
-  return sf("Vendas sem solução", sp.villains().count());
+  return sf("Vendas sem nenhuma solução", sp.villains().count());
 }

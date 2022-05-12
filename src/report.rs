@@ -75,7 +75,7 @@ impl Component for ReportDisplay {
             for ctx.props().sfields.iter().map(|sf| {
               html_nested! {
                 <li>
-                  <b>{ &sf.0 }</b>{ ":" } { &sf.1 }
+                  <b>{ &sf.0 }</b>{ ": " } { &sf.1 }
                 </li>
               }
             })
@@ -86,13 +86,13 @@ impl Component for ReportDisplay {
             for ctx.props().tfields.iter().map(|tf| {
               html_nested! {
                 <li>
-                  <b>{ &tf.0 }</b>{ ":" }
+                  <b>{ &tf.0 }</b>{ ": " }
                   <ul class="tfield-vals">
                     {
                       for tf.1.iter().map(|(k, v)| {
                         html_nested! {
                           <li>
-                            <b>{ &k }</b>{ ":" } { &v }
+                            <b>{ &k }</b>{ ": " } { &v }
                           </li>
                         }
                       })

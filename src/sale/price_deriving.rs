@@ -59,6 +59,15 @@ impl PricingMatch {
       PricingMatch::TurnOfBatch(ba1, ba2) => ba1.1 + ba2.1,
     }
   }
+
+  /// The batch after this was sold.
+  pub(crate) fn batch_after(&self) -> Batch {
+    return match self {
+      PricingMatch::Multiple(ba) => ba.0,
+      PricingMatch::PromoCombo(_, ba) => ba.0,
+      PricingMatch::TurnOfBatch(_, ba) => ba.0,
+    };
+  }
   
   /// Returns all pricing matches for a certain price in cents.
   pub(crate) fn all_priced(price: usize, ctx: &SalesContext) -> Vec<Self> {
