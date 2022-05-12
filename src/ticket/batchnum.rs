@@ -6,8 +6,20 @@ use std::fmt::Display;
 /// The number of a single ticket batch.
 #[derive(Copy, Clone, Debug, Hash, PartialEq, Eq)]
 pub(crate) enum BatchNum {
+  /// Promo batch
   Promo,
+  /// Numbered batches (start at 1!).
   Numbered(usize)
+}
+
+impl BatchNum {
+  /// Implicit batch number -- promo is zero.
+  pub(crate) fn inum(&self) -> usize {
+    return match self {
+      BatchNum::Promo => 0,
+      BatchNum::Numbered(n) => *n,
+    }
+  }
 }
 
 impl PartialOrd for BatchNum {
