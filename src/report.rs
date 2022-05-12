@@ -94,20 +94,18 @@ impl Component for ReportDisplay {
     return html! {
       <div class="report">
         <hr />
-        <small>
-          <table class="sfields">
-            {
-              for ctx.props().sfields.iter().map(|sf| {
-                html_nested! {
-                  <tr>
-                    <td><b>{ &sf.0 }</b></td>
-                    <td>{ &sf.1 }</td>
-                  </tr>
-                }
-              })
-            }
-          </table>
-        </small>
+        <table class="sfields">
+          {
+            for ctx.props().sfields.iter().map(|sf| {
+              html_nested! {
+                <tr>
+                  <td><b>{ &sf.0 }</b></td>
+                  <td>{ &sf.1 }</td>
+                </tr>
+              }
+            })
+          }
+        </table>
         <hr />
         <div class="tfields">
           {
@@ -116,20 +114,18 @@ impl Component for ReportDisplay {
                 <div>
                   <b>{ &tf.0 }</b>{ ": " }
                   <br />
-                  <small>
-                    <table class="tfield-vals">
-                      {
-                        for tf.1.iter().map(|(k, v)| {
-                          html_nested! {
-                            <tr>
-                              <td><b>{ &k }</b></td>
-                              <td>{ &v }</td>
-                            </tr>
-                          }
-                        })
-                      }
-                    </table>
-                  </small>
+                  <table class="tfield-vals">
+                    {
+                      for tf.1.iter().map(|(k, v)| {
+                        html_nested! {
+                          <tr>
+                            <td><b>{ &k }</b></td>
+                            <td>{ &v }</td>
+                          </tr>
+                        }
+                      })
+                    }
+                  </table>
                 </div>
               }
             })

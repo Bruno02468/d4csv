@@ -1,11 +1,8 @@
 //! Structs for storing sale data and extra context and derived info.
 
-use std::cell::Cell;
 use std::collections::HashSet;
 use std::fmt::Display;
-
 use itertools::Itertools;
-
 use crate::context::SalesContext;
 use crate::sale::Sale;
 use crate::sale::price_deriving::{PricingCandidate, PricingMatch, PricingCandidateCache};
@@ -32,17 +29,17 @@ impl SalePlus {
   /// Generate a line for the "better CSV".
   pub(crate) fn gen_better_csv_line(&self) -> Vec<String> {
     let mut v: Vec<String> = Vec::new();
-    let mut p = |vr: &mut Vec<String>, s: &dyn Display| {
+    let p = |vr: &mut Vec<String>, s: &dyn Display| {
       vr.push(s.to_string());
     };
-    let mut ps = |vr: &mut Vec<String>, s: Option<&String>| {
+    let ps = |vr: &mut Vec<String>, s: Option<&String>| {
       vr.push(s.unwrap_or(&"".into()).to_owned());
     };
     // add fields one by one
     p(&mut v, &self.sale.when);
     ps(&mut v, self.sale.buyer_email.as_ref());
     ps(&mut v, self.sale.buyer_username.as_ref());
-    p(&mut v, &self.sale.value);
+    p(&mut v, &(self.sale.value as f64 / 100.0));
     p(&mut v, &self.sale.sale_kind);
     ps(&mut v, self.sale.seller_name.as_ref());
     ps(&mut v, self.sale.seller_id.as_ref());

@@ -80,11 +80,18 @@ impl TryFrom<(StringRecord, &SalesContext)> for Sale {
         format!("expected {} columns, got {}", RECORD_LEN, v.len()).into()
       );
     }
+    let val: f64 = v.get(3).ok_or("f64 parse error")?.parse()?;
+    log::info!(
+      "{:?} vira {} vira {}",
+      v.get(3),
+      val,
+      (val * 100.0).round() as usize
+    );
     return Ok(Self {
       when: DateTime::parse_from_rfc3339(v.get(0).unwrap())?.into(),
       buyer_email: field_or_na(v.get(1)),
       buyer_username: field_or_na(v.get(2)),
-      value: (v.get(3).unwrap().parse::<f64>()? * 100.0).floor() as usize,
+      value: (val * 100.0).round() as usize,
       sale_kind: {
         if v.get(4).unwrap().contains("Online") {
           SaleKind::Online(ctx.online_fee)

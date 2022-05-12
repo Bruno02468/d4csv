@@ -69,7 +69,7 @@ impl Component for App {
 
   fn update(&mut self, _ctx: &yew::Context<Self>, msg: Self::Message) -> bool {
     let mut b = false;
-    log::info!("{:#?}", &self);
+    // log::info!("{:#?}", &self);
     match msg {
       AppMsg::ShowErrors(ve) => {
         self.state = AppState::Errors(ve);
