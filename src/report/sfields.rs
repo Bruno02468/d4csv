@@ -18,7 +18,8 @@ pub(crate) static SFIELDS: &[FieldFn] = &[
   ambiguous_sales,
   evil_sales,
   total_tickets,
-  online_tickets
+  online_tickets,
+  offline_tickets
 ];
 
 /// Total sales in list.
@@ -53,6 +54,20 @@ fn online_tickets(sp: &SalesPlus) -> StringField {
     sp.oks()
       .filter_map(|s| {
         if let SaleKind::Online((_, _)) = &s.sale.sale_kind {
+          return Some(s.pricematch.unwrap().tickets());
+        }
+        return None;
+      }).sum::<usize>()
+  );
+}
+
+/// Total tickets sold offline.
+fn offline_tickets(sp: &SalesPlus) -> StringField {
+  return sf(
+    "Ingressos físicos",
+    sp.oks()
+      .filter_map(|s| {
+        if let SaleKind::Offline = &s.sale.sale_kind {
           return Some(s.pricematch.unwrap().tickets());
         }
         return None;

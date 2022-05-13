@@ -114,6 +114,7 @@ impl Component for ReportDisplay {
                 <div>
                   <b>{ &tf.0 }</b>{ ": " }
                   <br />
+                  <br />
                   <table class="tfield-vals">
                     {
                       for tf.1.iter().map(|(k, v)| {
@@ -134,6 +135,7 @@ impl Component for ReportDisplay {
         <hr />
         <div class="better-csv">
           <b>{ "CSV melhorado:" }</b>
+          <br />
           <br />
           <textarea
             class="csv-in" 

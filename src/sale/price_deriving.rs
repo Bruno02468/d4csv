@@ -101,7 +101,7 @@ impl PricingMatch {
       None => return v,
     }
     // worst-case amount and range
-    let w = price / mp + 1;
+    let w = price / mp + 5;
     let wr: Range<usize> = Range { start: 1, end: w };
     // this returns an iterator with all batches' ranges
     let allba: Vec<BatchAmount> = bp2iter(&ctx.batches)
