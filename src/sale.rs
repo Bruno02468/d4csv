@@ -7,7 +7,7 @@ use std::io::Read;
 use chrono::{DateTime, Utc};
 use csv::{StringRecord, StringRecordsIter};
 use crate::context::SalesContext;
-use crate::sale::kind::SaleKind;
+use crate::sale::kind::{SaleKind, Seller};
 
 pub(crate) mod kind;
 pub(crate) mod price_deriving;
@@ -82,12 +82,6 @@ impl TryFrom<(StringRecord, &SalesContext)> for Sale {
       );
     }
     let val: f64 = v.get(3).ok_or("f64 parse error")?.parse()?;
-    log::info!(
-      "{:?} vira {} vira {}",
-      v.get(3),
-      val,
-      (val * 100.0).round() as usize
-    );
     return Ok(Self {
       when: DateTime::parse_from_rfc3339(v.get(0).unwrap())?.into(),
       buyer_email: field_or_na(v.get(1)),
@@ -133,5 +127,15 @@ impl Sale {
     }
     sv.sort_by(Sale::cmp_dates);
     return (sv, ev);
+  }
+
+  /// Infer the seller, if at all possible.
+  pub(crate) fn seller(&self) -> Option<Seller> {
+    return match (&self.sale_kind, &self.seller_name) {
+      (SaleKind::Online(_), _) => Some(Seller::Online),
+      // (SaleKind::Online(_), Some(_)) => None,
+      (SaleKind::Offline, None) => None,
+      (SaleKind::Offline, Some(s)) => Some(Seller::Offline(s.clone())),
+    };
   }
 }

@@ -6,7 +6,6 @@ use std::fmt::Display;
 use std::ops::Range;
 use itertools::Itertools;
 use crate::context::SalesContext;
-use crate::sale::plus::SalesPlus;
 use crate::ticket::batch::{Batch, bp2iter};
 use crate::ticket::batchnum::BatchNum;
 
@@ -89,6 +88,15 @@ impl PricingMatch {
       PricingMatch::PromoCombo(_, ba) => ba.0,
       PricingMatch::TurnOfBatch(_, ba) => ba.0,
     };
+  }
+
+  /// All batches sold in this operation.
+  pub(crate) fn batches(&self) -> HashSet<Batch> {
+    return match self {
+      PricingMatch::Multiple(ba) => vec![ba.0],
+      PricingMatch::PromoCombo(pba, ba) => vec![pba.0, ba.0],
+      PricingMatch::TurnOfBatch(ba1, ba2) => vec![ba1.0, ba2.0],
+    }.into_iter().collect();
   }
   
   /// Returns all pricing matches for a certain price in cents.

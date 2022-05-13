@@ -38,3 +38,13 @@ impl Display for SaleKind {
     });
   }
 }
+
+/// An alternative version of SaleKind -- more suited to store actual seller
+/// information.
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+pub(crate) enum Seller {
+  /// Onlne sale.
+  Online,
+  /// Offline sale, containing seller name.
+  Offline(String)
+}

@@ -45,7 +45,13 @@ impl App {
           .from_reader(txt.as_bytes());
         let sales = Sale::parse_csv(rdr.records(), &ctx);
         let mut sp = SalesPlus::from_sales(sales.0.into_iter(), ctx.clone());
-        // TODO 
+        let (passes, solves) = sp.solve_ambiguities();
+        log::info!(
+          "solver \"{}\" removed {} ambiguities in {} passes",
+          sp.context.solver.name(),
+          solves,
+          passes
+        );
         return Some(sp);
       }
     }

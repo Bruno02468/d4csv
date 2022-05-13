@@ -2,10 +2,11 @@
 
 use std::error::Error;
 use itertools::Itertools;
-use yew::{Component, Properties, html};
+use yew::{Component, Properties, html, html_nested};
 use yew::html::{TargetCast, Scope};
 use web_sys::{Event, HtmlInputElement};
 use crate::app::{App, AppMsg};
+use crate::sale::ambiguity::AmbiguitySolver;
 use crate::ticket::batch::{BatchPrices, iter2bp, bp2iter, Batch};
 
 static WEBFEE_PRECISION: usize = 1000;
@@ -18,8 +19,10 @@ pub(crate) struct SalesContext {
   pub(crate) online_fee: (usize, usize),
   /// Batch prices.
   pub(crate) batches: BatchPrices,
-  /// Promo batch limit per person.
-  pub(crate) promo_limit: Option<usize>
+  /// Promo batch limit per person.type Error;
+  pub(crate) promo_limit: Option<usize>,
+  /// Ambiguity solver.
+  pub(crate) solver: AmbiguitySolver
 }
 
 impl Default for SalesContext {
@@ -28,7 +31,8 @@ impl Default for SalesContext {
     Self {
       online_fee: (11, 10),
       batches: iter2bp(vec![5500, 6500, 7500, 8500].into_iter()),
-      promo_limit: Some(1)
+      promo_limit: Some(1),
+      solver: AmbiguitySolver::SellerLookBehind
     }
   }
 }
@@ -38,7 +42,8 @@ impl Default for SalesContext {
 pub(crate) struct ContextInputData {
   webfee: f64,
   prices: String,
-  promos: f64
+  promos: f64,
+  solver: String
 }
 
 impl TryFrom<ContextInputData> for SalesContext {
@@ -71,7 +76,8 @@ impl TryFrom<ContextInputData> for SalesContext {
         } else {
           None
         }
-      }
+      },
+      solver: data.solver.as_str().try_into().unwrap_or_default()
     });
   }
 }
@@ -89,6 +95,7 @@ impl From<&SalesContext> for ContextInputData {
         Some(n) => n as f64,
         None => 0.0,
       },
+      solver: ctx.solver.name().to_owned()
     }
   }
 }
@@ -112,7 +119,9 @@ pub(crate) enum ContextInputMsg {
   /// A change to the batch prices list.
   PricesChanged(String),
   /// A change to the promo limits.
-  PromosChanged(f64)
+  PromosChanged(f64),
+  /// A change to the ambiguity solver selection.
+  SolverChanged(String)
 }
 
 impl ContextInput {
@@ -160,6 +169,12 @@ impl Component for ContextInput {
           // b = true;
         }
       },
+      ContextInputMsg::SolverChanged(sn) => {
+        if self.data.solver != sn {
+          self.data.solver = sn;
+        }
+      },
+      
     }
     self.send_up(ctx);
     return b;
@@ -180,6 +195,11 @@ impl Component for ContextInput {
       let input: HtmlInputElement = e.target_unchecked_into();
       let v = input.value_as_number();
       return Self::Message::PromosChanged(v);
+    });
+    let solver_change = ctx.link().callback(|e: Event| {
+      let input: HtmlInputElement = e.target_unchecked_into();
+      let v = input.value();
+      return Self::Message::SolverChanged(v);
     });
     return html! {
       <div id="context-form">
@@ -206,6 +226,17 @@ impl Component for ContextInput {
           onchange={promos_change}
           value={Some(self.data.promos.to_string())}
         />
+        <br />
+        { "método para resolver ambiguidades: "}
+        <select onchange={ solver_change }>
+          {
+            for AmbiguitySolver::available().map(|solv| {
+              html_nested! {
+                <option value={ solv.name() }>{ solv }</option>
+              }
+            })
+          }
+        </select>
         <br />
       </div>
     }

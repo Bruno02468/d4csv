@@ -2,11 +2,10 @@
 
 use std::collections::HashSet;
 use std::fmt::Display;
-use crate::sale::kind::SaleKind;
+use crate::sale::kind::Seller;
 use crate::sale::plus::SalesPlus;
 use crate::sale::price_deriving::{PricingCandidate, PricingMatch};
 use crate::ticket::batch::Batch;
-use crate::ticket::batchnum::BatchNum;
 
 /// A function that resolves ambiguities.
 pub(crate) type AmbiguitySolverFn = fn(&mut SalesPlus) -> usize;
@@ -70,38 +69,90 @@ fn temporal_lookbehind(sp: &mut SalesPlus) -> usize {
       }
     }
   }
-  log::info!("comb_simple did {}", res);
   return res;
 }
 
 /// Implementation of the SellerLookBehind solver.
 fn seller_lookbehind(sp: &mut SalesPlus) -> usize {
-  let sellers: HashSet<String> = sp.sales.iter()
-    .filter_map(|s| {
-      if s.sale.sale_kind == SaleKind::Offline {
-        if let Some(ref sn) = s.sale.seller_name {
-          return Some(sn.clone());
-        }
-      }
-      return None;
-    }).collect();
+  let mut total: usize = 0;
+  let sellers: HashSet<Seller> = sp.sales.iter()
+    .filter_map(|s| { s.sale.seller() })
+    .collect();
   for seller in sellers {
-    let theirs = sp.sales.iter().filter(|s| {
-      if let Some(sn) = &s.sale.seller_name {
-        return sn == &seller;
+    let theirs = sp.sales.iter_mut().filter(|s| {
+      if let Some(slr) = &s.sale.seller() {
+        return slr == &seller;
       }
       return false;
     });
-    let batch: Option<BatchNum> = None;
-    for sale in theirs {
-      todo!();
+    let mut batches: Option<HashSet<Batch>> = None;
+    for mut sale in theirs {
+      if let Some(pm) = sale.pricematch {
+        batches = Some(pm.batches());
+      } else if let Some(ref bhs) = batches {
+        if let PricingCandidate::Ambiguous(cands) = sale.pricecand.clone() {
+          // remove candidates without batches in common to the above
+          let newcands: Vec<&PricingMatch> = cands.iter()
+            .filter(|pcm| {
+              !pcm.batches().is_disjoint(bhs)
+            }).collect();
+          if newcands.len() < cands.len() && newcands.len() > 0 {
+            // ambiguity diminished
+            // log::info!("{:#?} virou {:#?}", cands, newcands);
+            if newcands.len() == 1 {
+              // ambiguity resolved!
+              (*sale).pricematch = Some(*newcands.get(0).unwrap().clone());
+              total += 1;
+            }
+            // write the new candidates anyway
+            (*sale).pricecand = PricingCandidate::from_iter(
+              newcands.into_iter()
+                .map(|s| s.clone())
+            );
+          }
+        }
+      }
     }
   }
-  return 0;
+  return total;
+}
+
+impl TryFrom<&str> for AmbiguitySolver {
+  type Error = ();
+  fn try_from(s: &str) -> Result<Self, Self::Error> {
+    return match s.to_lowercase().as_str() {
+      "nothing" => Ok(AmbiguitySolver::DoNothing),
+      "temporal" => Ok(AmbiguitySolver::TemporalLookbehind),
+      "seller" => Ok(AmbiguitySolver::SellerLookBehind),
+      _ => Err(())
+    };
+  }
+}
+
+impl AmbiguitySolver {
+  pub(crate) fn name(&self) -> &'static str {
+    return match self {
+      AmbiguitySolver::DoNothing => "nothing",
+      AmbiguitySolver::TemporalLookbehind => "temporal",
+      AmbiguitySolver::SellerLookBehind => "seller",
+    };
+  }
+
+  pub(crate) fn available() -> impl Iterator<Item = Self> {
+    return [
+      Self::DoNothing,
+      Self::TemporalLookbehind,
+      Self::SellerLookBehind
+    ].into_iter();
+  }
 }
 
 impl From<AmbiguitySolver> for AmbiguitySolverFn {
-  fn from(_: AmbiguitySolver) -> Self {
-    todo!()
+  fn from(solv: AmbiguitySolver) -> Self {
+    return match solv {
+      AmbiguitySolver::DoNothing => do_nothing,
+      AmbiguitySolver::TemporalLookbehind => temporal_lookbehind,
+      AmbiguitySolver::SellerLookBehind => seller_lookbehind,
+    };
   }
 }

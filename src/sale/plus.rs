@@ -1,12 +1,13 @@
 //! Structs for storing sale data and extra context and derived info.
 
-use std::collections::HashSet;
 use std::fmt::Display;
 use itertools::Itertools;
 use crate::context::SalesContext;
 use crate::sale::Sale;
-use crate::sale::price_deriving::{PricingCandidate, PricingMatch, PricingCandidateCache};
-use crate::ticket::batch::Batch;
+use crate::sale::ambiguity::AmbiguitySolverFn;
+use crate::sale::price_deriving::{
+  PricingCandidate, PricingMatch, PricingCandidateCache
+};
 
 /// Sale plus inferred data.
 #[derive(Clone, Debug)]
@@ -184,5 +185,25 @@ impl SalesPlus {
     return self.sales.iter()
       .map(|s| s.gen_better_csv_line())
       .collect();
+  }
+
+  /// Applies the selected ambiguity solver once.
+  pub(crate) fn run_solver(&mut self) -> usize {
+    let f: AmbiguitySolverFn = self.context.solver.into();
+    return f(self);
+  }
+
+  /// Applies the selected ambiguity solver until done.
+  /// Returns (passes, solveds).
+  pub(crate) fn solve_ambiguities(&mut self) -> (usize, usize) {
+    let mut passes: usize = 0;
+    let mut solves: usize = 0;
+    loop {
+      let thispass = self.run_solver();
+      passes += 1;
+      solves += thispass;
+      if thispass == 0 { break; }
+    }
+    return (passes, solves);
   }
 }
