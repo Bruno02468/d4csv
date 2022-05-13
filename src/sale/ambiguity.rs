@@ -86,23 +86,39 @@ fn seller_lookbehind(sp: &mut SalesPlus) -> usize {
       return false;
     });
     let mut batches: Option<HashSet<Batch>> = None;
+    let mut accbatches: HashSet<Batch> = HashSet::new();
     for mut sale in theirs {
       if let Some(pm) = sale.pricematch {
+        accbatches.extend(pm.batches());
         batches = Some(pm.batches());
       } else if let Some(ref bhs) = batches {
         if let PricingCandidate::Ambiguous(cands) = sale.pricecand.clone() {
           // remove candidates without batches in common to the above
-          let newcands: Vec<&PricingMatch> = cands.iter()
+          let newcands: HashSet<&PricingMatch> = cands.iter()
             .filter(|pcm| {
-              !pcm.batches().is_disjoint(bhs)
+              !pcm.batches().is_disjoint(&accbatches)
             }).collect();
-          if newcands.len() < cands.len() && newcands.len() > 0 {
-            // ambiguity diminished
+          if newcands.len() > 0 {
+            // ambiguity diminished (maybe)
             // log::info!("{:#?} virou {:#?}", cands, newcands);
             if newcands.len() == 1 {
               // ambiguity resolved!
-              (*sale).pricematch = Some(*newcands.get(0).unwrap().clone());
+              (*sale).pricematch = Some(
+                *newcands.iter().nth(0).unwrap().clone()
+              );
               total += 1;
+            } else {
+              // try for no new batches.
+              let nonews: HashSet<&&PricingMatch> = newcands.iter()
+                .filter(|pm| pm.batches().is_subset(&bhs))
+                .collect();
+              if nonews.len() == 1 {
+                // only one with no new batches. nice!
+                (*sale).pricematch = Some(
+                  *newcands.iter().nth(0).unwrap().clone()
+                );
+                total += 1;
+              }
             }
             // write the new candidates anyway
             (*sale).pricecand = PricingCandidate::from_iter(
