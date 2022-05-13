@@ -12,6 +12,7 @@ use crate::sale::kind::SaleKind;
 pub(crate) mod kind;
 pub(crate) mod price_deriving;
 pub(crate) mod plus;
+pub(crate) mod ambiguity;
 
 static RECORD_LEN: usize = 13;
 static NA: &str = "N/A";

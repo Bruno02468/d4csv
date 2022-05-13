@@ -97,6 +97,9 @@ impl SalePlus {
       "Decodificação de preço"
     ].iter().map(|s| s.to_string()).collect();
   }
+
+  // If resolved, returns the batches contained in the candidate.
+  //pub(crate)
 }
 
 impl AsRef<Sale> for SalePlus {
@@ -181,35 +184,5 @@ impl SalesPlus {
     return self.sales.iter()
       .map(|s| s.gen_better_csv_line())
       .collect();
-  }
-
-  /// Basic comb: look at adjacencies downwards. Returns the number of
-  /// resolutions (i.e. effective changes).
-  pub(crate) fn comb_simple(&mut self) -> usize {
-    let mut batch: Option<Batch> = None;
-    let mut res: usize = 0;
-    for sp in self.sales.iter_mut() {
-      if let Some(pm) = sp.pricematch {
-        // we're now sure of the batch
-        batch = Some(pm.batch_after());
-      } else if let Some(b) = batch {
-        // we can use the known batch to solve an ambiguity
-        if let PricingCandidate::Ambiguous(hs) = &sp.pricecand {
-          let mut compat: HashSet<PricingMatch> = hs.clone().into_iter()
-            .filter(|pc| pc.batch_after() == b)
-            .collect();
-          match compat.len() {
-            0 => continue,
-            1 => {
-              sp.resolve(compat.drain().nth(0).unwrap());
-              res += 1;
-            },
-            _ => sp.pricecand = PricingCandidate::Ambiguous(compat)
-          }
-        }
-      }
-    }
-    log::info!("comb_simple did {}", res);
-    return res;
   }
 }

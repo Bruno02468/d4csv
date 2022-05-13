@@ -40,7 +40,7 @@ pub(crate) fn sales_per_seller(sp: &SalesPlus) -> TableField {
       return ();
     });
   return tf(
-    "Ingressos físicos por ponto",
+    "Ingressos físicos por ponto de venda",
     hm
   );
 }

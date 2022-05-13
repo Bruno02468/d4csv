@@ -6,6 +6,7 @@ use std::fmt::Display;
 use std::ops::Range;
 use itertools::Itertools;
 use crate::context::SalesContext;
+use crate::sale::plus::SalesPlus;
 use crate::ticket::batch::{Batch, bp2iter};
 use crate::ticket::batchnum::BatchNum;
 

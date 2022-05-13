@@ -45,9 +45,7 @@ impl App {
           .from_reader(txt.as_bytes());
         let sales = Sale::parse_csv(rdr.records(), &ctx);
         let mut sp = SalesPlus::from_sales(sales.0.into_iter(), ctx.clone());
-        loop {
-          if sp.comb_simple() == 0 { break; }
-        }
+        // TODO 
         return Some(sp);
       }
     }
